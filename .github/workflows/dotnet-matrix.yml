@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet-version: ['5.0.x','3.1.x']
+        dotnet-version: ['5.0.x','6.0.x']
     name: Running build on version ${{ matrix.dotnet-version }}
     steps:
     - uses: actions/checkout@v2
@@ -20,6 +20,7 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: ${{ matrix.dotnet-version }}
+        include-prerelease: true
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
