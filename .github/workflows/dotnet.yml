@@ -47,7 +47,7 @@ jobs:
         path: '${{ env.PUBLISH_PATH }}/publish'
         retention-days: 1
   
-  deploy:
+  deploy_to_dev:
     needs: build #making build as a prerequisite job to complete
     runs-on: ubuntu-latest
     steps:
@@ -67,5 +67,27 @@ jobs:
         # Applies to Web Apps(Windows and Linux) and Web App Containers(linux). Multi container scenario not supported. Publish profile (*.publishsettings) file contents with Web Deploy secrets
         publish-profile: ${{ secrets.AZURE_WEB_APP_PUBLISH_PROFILE }}
         package: '${{ env.PUBLISH_PATH }}/publish'
+  deploy_to_prod:
+    needs: deploy_to_dev
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+    
+    - name: Download a Build Artifact
+      uses: actions/download-artifact@v2.0.10
+      with:
+        # Artifact name
+        name: dotnet-webapi
+        path: '${{ env.PUBLISH_PATH }}/publish'
+        # Destination path
+    - name: Azure WebApp
+      uses: Azure/webapps-deploy@v2
+      with:
+        # Name of the Azure Web App
+        app-name: dotnet-learners-house-prod
+        # Applies to Web Apps(Windows and Linux) and Web App Containers(linux). Multi container scenario not supported. Publish profile (*.publishsettings) file contents with Web Deploy secrets
+        publish-profile: ${{ secrets.AZURE_WEB_APP_PUBLISH_PROFILE_PROD }}
+        package: '${{ env.PUBLISH_PATH }}/publish'
+    
   
     
