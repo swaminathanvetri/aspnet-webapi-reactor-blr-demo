@@ -38,14 +38,26 @@ jobs:
       run: dotnet test --no-build --verbosity normal
     - name: Publish
       run: dotnet publish -c Release -o '${{ env.PUBLISH_PATH }}/publish'
-    outputs:
-      publish_package: '${{ env.PUBLISH_PATH }}/publish'
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v2.2.4
+      with:
+        # Artifact name
+        name: dotnet-webapi
+        # A file, directory or wildcard pattern that describes what to upload
+        path: '${{ env.PUBLISH_PATH }}/publish'
+        retention-days: 1
   
   deploy:
     needs: build #making build as a prerequisite job to complete
     runs-on: ubuntu-latest
     steps:
-    - run: echo '${{ needs.build.outputs.publish_package }}'
+    
+    - name: Download a Build Artifact
+      uses: actions/download-artifact@v2.0.10
+      with:
+        # Artifact name
+        name: dotnet-webapi
+        # Destination path
     - name: Azure WebApp
       uses: Azure/webapps-deploy@v2
       with:
@@ -53,6 +65,6 @@ jobs:
         app-name: dotnet-learners-house-demo
         # Applies to Web Apps(Windows and Linux) and Web App Containers(linux). Multi container scenario not supported. Publish profile (*.publishsettings) file contents with Web Deploy secrets
         publish-profile: ${{ secrets.AZURE_WEB_APP_PUBLISH_PROFILE }}
-        package: '${{ needs.build.outputs.publish_package }}'
+        package: dotnet-webapi
   
     
