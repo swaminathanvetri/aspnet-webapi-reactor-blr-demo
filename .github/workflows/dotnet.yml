@@ -1,10 +1,12 @@
-name: Build .NET App
+name: Build & Deploy .NET App
 
 on:
   push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  workflow_dispatch:
+    
 
 jobs:
   build:
@@ -32,3 +34,17 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
+  
+  deploy:
+    needs: build #making build as a prerequisite job to complete
+    runs-on: ubuntu-latest
+    steps:
+    - name: Azure WebApp
+      uses: Azure/webapps-deploy@v2
+      with:
+        # Name of the Azure Web App
+        app-name: dotnet-learners-house-demo
+        # Applies to Web Apps(Windows and Linux) and Web App Containers(linux). Multi container scenario not supported. Publish profile (*.publishsettings) file contents with Web Deploy secrets
+        publish-profile: ${{ secrets.AZURE_WEB_APP_PUBLISH_PROFILE }}
+  
+    
