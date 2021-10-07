@@ -1,0 +1,28 @@
+name: .NET Multi Target Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet-version: ['5.0.x','3.1.x']
+    name: Running build on version ${{ matrix.dotnet-version }}
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET 
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ matrix.dotnet-version }}
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
